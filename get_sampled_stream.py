@@ -47,7 +47,7 @@ def dump_tweets(tweets, t1, t2, dst):
 start = datetime.datetime.now()
 tweets = []
 
-dst = "/data/sampled_stream"
+dst = "/data/twitter_sampled_stream_v2"
 while True:
     for tweet in client.sample(
             event=None, 

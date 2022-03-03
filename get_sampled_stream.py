@@ -48,6 +48,8 @@ start = datetime.datetime.now()
 tweets = []
 
 dst = "/data/twitter_sampled_stream_v2"
+dumptime = 60 # time [in seconds] at which the stream is dumped to disk
+
 while True:
     for tweet in client.sample(
             event=None, 
@@ -68,7 +70,7 @@ while True:
             tweets.append(data)
             
         now = datetime.datetime.now()
-        if (start - now).seconds % 10 == 0: # dump tweets every minute
+        if (start - now).seconds % dumptime == 0: # dump tweets every minute
             print("dumping tweets")
             dump_tweets(tweets, start, now, dst)
             tweets = []

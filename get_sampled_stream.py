@@ -65,9 +65,12 @@ while True:
         if tweet == 'keep-alive':
             print("staying alive ...")
         else:
-            data = tweet["data"]
-            data["retrieved_at"]= tweet["__twarc"]["retrieved_at"]
-            tweets.append(data)
+            try:
+                data = tweet["data"]
+                data["retrieved_at"]= tweet["__twarc"]["retrieved_at"]
+                tweets.append(data)
+            except Exception as e:
+                print(Exception)
             
         now = datetime.datetime.now()
         if (start - now).seconds % dumptime == 0: # dump tweets every minute

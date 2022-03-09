@@ -1,4 +1,7 @@
 #! /usr/local/anaconda3/bin/python
+import sys
+sys.path.insert(0, "/home/jlasser/.local/lib/python3.8/site-packages/")
+
 
 from twarc import Twarc2
 import pandas as pd
@@ -8,7 +11,6 @@ import datetime
 import lzma
 import os
 
-import sys
 sys.path.append('/home/jlasser/utilities/twitter_functions')
 import twitter_functions as tf
 

@@ -10,6 +10,10 @@ import json
 import datetime
 import lzma
 import os
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+import socket
 
 sys.path.append('/home/jlasser/utilities/twitter_functions')
 import twitter_functions as tf
@@ -19,6 +23,30 @@ credname = "david"
 credentials = tf.get_twitter_API_credentials([credname], keydst=keydst)
 bearer_token = credentials[credname]
 client = Twarc2(bearer_token=bearer_token)
+
+def notify(subject, body):
+    host = socket.gethostname()
+    fromaddr = "crawler@janalasser.at"
+    toaddr = "jana.lasser@tugraz.at"
+    msg = MIMEMultipart()
+    msg['From'] = fromaddr
+    msg['To'] = toaddr
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    email_credentials = {}
+    with open("email_credentials.txt", "r") as f:
+        for line in f.readlines():
+            line = line.strip("\n")
+            email_credentials[line.split("=")[0]] = line.split("=")[1]
+
+    server = smtplib.SMTP(email_credentials["server"], int(email_credentials["port"]))
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(email_credentials["user"], email_credentials["password"])
+    text = msg.as_string()
+    server.sendmail(fromaddr, toaddr, text)
 
 
 def dump_tweets(tweets, t1, t2, dst):
@@ -47,9 +75,11 @@ def dump_tweets(tweets, t1, t2, dst):
             json_bytes = json_str.encode('utf-8')
             f.write(json_bytes)   
             
-            
+
 start = datetime.datetime.now()
 tweets = []
+
+notify(f"[NOTICE] started sampled stream on {host}!", str(start))
 
 dst = "/data/twitter_sampled_stream_v2"
 dumptime = 60 # time [in seconds] at which the stream is dumped to disk
@@ -84,41 +114,8 @@ try:
                 dump_tweets(tweets, start, now, dst)
                 tweets = []
                 start = datetime.datetime.now()
+                
 except Exception as e:
-    print(f"caught {e}")
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    import smtplib
-    import socket
-
-    host = socket.gethostname()
-    fromaddr = "crawler@janalasser.at"
-    toaddr = "jana.lasser@tugraz.at"
-    msg = MIMEMultipart()
-    msg['From'] = fromaddr
-    msg['To'] = toaddr
-    msg['Subject'] = f"[WARNING] sampled stream terminated on {host}!"
-
-    body = str(e)
-    #body = ""
-    #with open("get_sampled_stream_err.txt", "r") as f:
-    #    for l in f.readlines():
-    #        body += l + "\n"
-
-    msg.attach(MIMEText(body, 'plain'))
-
-    email_credentials = {}
-    with open("email_credentials.txt", "r") as f:
-        for line in f.readlines():
-            line = line.strip("\n")
-            email_credentials[line.split("=")[0]] = line.split("=")[1]
-
-    server = smtplib.SMTP(email_credentials["server"], int(email_credentials["port"]))
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-    server.login(email_credentials["user"], email_credentials["password"])
-    text = msg.as_string()
-    server.sendmail(fromaddr, toaddr, text)
+    notify(f"[WARNING] sampled stream terminated on {host}!", str(e))
         
         

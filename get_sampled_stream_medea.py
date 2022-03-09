@@ -25,7 +25,6 @@ bearer_token = credentials[credname]
 client = Twarc2(bearer_token=bearer_token)
 
 def notify(subject, body):
-    host = socket.gethostname()
     fromaddr = "crawler@janalasser.at"
     toaddr = "jana.lasser@tugraz.at"
     msg = MIMEMultipart()
@@ -79,6 +78,7 @@ def dump_tweets(tweets, t1, t2, dst):
 start = datetime.datetime.now()
 tweets = []
 
+host = socket.gethostname()
 notify(f"[NOTICE] started sampled stream on {host}!", str(start))
 
 dst = "/data/twitter_sampled_stream_v2"

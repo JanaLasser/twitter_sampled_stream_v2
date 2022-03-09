@@ -1,4 +1,6 @@
 #! /usr/bin/python3
+
+
 import sys
 sys.path.insert(0, "/home/jana/.local/lib/python3.9/site-packages/")
 
@@ -14,6 +16,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 import socket
+
 
 sys.path.append('/home/jana/utilities/twitter_functions')
 import twitter_functions as tf
@@ -74,6 +77,7 @@ def dump_tweets(tweets, t1, t2, dst):
             json_bytes = json_str.encode('utf-8')
             f.write(json_bytes)   
             
+
 
 start = datetime.datetime.now()
 tweets = []

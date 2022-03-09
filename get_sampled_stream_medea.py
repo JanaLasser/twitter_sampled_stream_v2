@@ -34,7 +34,7 @@ def notify(subject, body):
     msg.attach(MIMEText(body, 'plain'))
 
     email_credentials = {}
-    with open("email_credentials.txt", "r") as f:
+    with open("/home/jlasser/twitter_sampled_stream_v2/email_credentials.txt", "r") as f:
         for line in f.readlines():
             line = line.strip("\n")
             email_credentials[line.split("=")[0]] = line.split("=")[1]

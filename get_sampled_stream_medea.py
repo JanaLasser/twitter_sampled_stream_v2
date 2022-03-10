@@ -1,10 +1,13 @@
 #! /usr/local/anaconda3/bin/python
-import sys
-sys.path.insert(0, "/home/jlasser/.local/lib/python3.8/site-packages/")
-API_key_dst = '/home/jlasser/utilities/twitter_API_keys'
-data_storage_dst = "/data/twitter_sampled_stream_v2"
+server_settings = {}
+with open(f"server_settings.txt", 'r') as f:
+    for l in f:
+        server_settings[l.split('=')[0]] = l.split('=')[1].strip('\n')
 
+import sys
+sys.path.insert(0, server_settings["library_dst"])
 from twarc import Twarc2
+from twarc.expansions import flatten
 import pandas as pd
 from os.path import join
 import json
@@ -14,18 +17,19 @@ import socket
 
 import sampled_stream_functions as ssf
 
+API_key_dst = server_settings["API_key_dst"]
+data_storage_dst = server_settings["data_storage_dst"]
 host = socket.gethostname()
-ssf.notify(f"[NOTICE] started sampled stream on {host}!", str(start))
-
 API_key_name = "david"
 credentials = ssf.get_twitter_API_credentials(API_key_name, keydst=API_key_dst)
-bearer_token = credentials[credname]
+bearer_token = credentials["bearer_token"]
 client = Twarc2(bearer_token=bearer_token)
 
 dumptime = 60 # time [in seconds] at which the stream is dumped to disk
 
 tweets = []
 start = datetime.datetime.now()
+ssf.notify(f"[NOTICE] started sampled stream on {host}!", str(start))
 try:
     while True:
         for tweet in client.sample(
@@ -49,7 +53,7 @@ try:
                                                        'id': None}]
                     tweets.append(tweet)
                 except Exception as e:
-                    print(Exception)
+                    print(e)
 
             now = datetime.datetime.now()
             if (start - now).seconds % dumptime == 0: # dump tweets every minute

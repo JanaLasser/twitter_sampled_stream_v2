@@ -1,19 +1,21 @@
 #! /usr/local/anaconda3/bin/python
+import os
+from os.path import join
+import sys
+import json
+import datetime
+import socket
+
+cwd = sys.argv[1]
 server_settings = {}
-with open(f"server_settings.txt", 'r') as f:
+with open(join(cwd, "server_settings.txt"), 'r') as f:
     for l in f:
         server_settings[l.split('=')[0]] = l.split('=')[1].strip('\n')
 
-import sys
 sys.path.insert(0, server_settings["library_dst"])
+import pandas as pd
 from twarc import Twarc2
 from twarc.expansions import flatten
-import pandas as pd
-from os.path import join
-import json
-import datetime
-import os
-import socket
 
 import sampled_stream_functions as ssf
 
@@ -29,7 +31,12 @@ dumptime = 60 # time [in seconds] at which the stream is dumped to disk
 
 tweets = []
 start = datetime.datetime.now()
-ssf.notify(f"[NOTICE] started sampled stream on {host}!", str(start))
+ssf.notify(
+    f"[NOTICE] started sampled stream on {host}!",
+    str(start), 
+    credential_src=cwd
+)
+
 try:
     while True:
         for tweet in client.sample(
@@ -63,6 +70,10 @@ try:
                 start = datetime.datetime.now()
                 
 except Exception as e:
-    ssf.notify(f"[WARNING] sampled stream terminated on {host}!", str(e))
+    ssf.notify(
+        f"[WARNING] sampled stream terminated on {host}!",
+        str(e),
+        credential_src=cwd
+    )
         
         

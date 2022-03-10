@@ -88,7 +88,7 @@ def notify(subject, body, credential_src=os.getcwd()):
     server.sendmail(fromaddr, toaddr, text)
 
 
-def dump_tweets(tweets, t1, t2, dst):
+def dump_tweets(tweets, t1, t2, dst, uid, gid):
     '''Save a list of tweets as binary line-separated json'''
     
     daydirname = "{}-{:02d}-{:02d}".format(t1.year, t1.month, t1.day)
@@ -96,10 +96,12 @@ def dump_tweets(tweets, t1, t2, dst):
 
     if not os.path.exists(join(dst, daydirname)):
         os.mkdir(join(dst, daydirname))
+        os.chown(join(dst, daydirname), uid, gid)
     
     
     if not os.path.exists(join(dst, daydirname, hourdirname)):
         os.mkdir(join(dst, daydirname, hourdirname))
+        os.chown(join(dst, daydirname, hourdirname), uid, gid)
     
     datetime1 = "{}-{:02d}-{:02d}_{:02d}:{:02d}:{:02d}"\
         .format(t1.year, t1.month, t1.day, t1.hour, t1.minute, t1.second)
@@ -112,4 +114,6 @@ def dump_tweets(tweets, t1, t2, dst):
         for tweet in tweets:
             json_str = json.dumps(tweet) + "\n"
             json_bytes = json_str.encode('utf-8')
-            f.write(json_bytes)      
+            f.write(json_bytes)
+            
+    os.chown(join(dst, daydirname, hourdirname, fname), uid, gid)

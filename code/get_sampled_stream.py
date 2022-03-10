@@ -1,28 +1,39 @@
-#! /usr/local/anaconda3/bin/python
 import os
 from os.path import join
 import sys
 import json
 import datetime
 import socket
+import pwd
+import grp
 
-cwd = sys.argv[1]
+## load the settings for the server we are running on ##
+# cwd is passed via the command line, since when running as a service we can't
+# get the current working directory via os.getcwd()
+cwd = sys.argv[1] 
 server_settings = {}
 with open(join(cwd, "server_settings.txt"), 'r') as f:
     for l in f:
         server_settings[l.split('=')[0]] = l.split('=')[1].strip('\n')
 
+# insert the library destination into the pythonpath and load third-party libs
 sys.path.insert(0, server_settings["library_dst"])
 import pandas as pd
 from twarc import Twarc2
 from twarc.expansions import flatten
 
+# custom functions for the stream scraper
 import sampled_stream_functions as ssf
+
 
 API_key_dst = server_settings["API_key_dst"]
 data_storage_dst = server_settings["data_storage_dst"]
+username = server_settings["username"]
+groupname = server_settings["groupname"]
+uid = pwd.getpwnam(username).pw_uid
+gid = grp.getgrnam(groupname).gr_gid
 host = socket.gethostname()
-API_key_name = "david"
+API_key_name = "jana"
 credentials = ssf.get_twitter_API_credentials(API_key_name, keydst=API_key_dst)
 bearer_token = credentials["bearer_token"]
 client = Twarc2(bearer_token=bearer_token)
@@ -65,7 +76,7 @@ try:
             now = datetime.datetime.now()
             if (start - now).seconds % dumptime == 0: # dump tweets every minute
                 print("dumping tweets")
-                ssf.dump_tweets(tweets, start, now, data_storage_dst)
+                ssf.dump_tweets(tweets, start, now, data_storage_dst, uid, gid)
                 tweets = []
                 start = datetime.datetime.now()
                 

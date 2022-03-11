@@ -4,6 +4,7 @@ import smtplib
 import os
 from os.path import join
 import json
+import pandas as pd
 
 USER_FIELDS = [
     "created_at",
@@ -41,6 +42,28 @@ TWEET_FIELDS = [
     "source",
     #"withheld",
 ]
+
+DTYPES = {
+    "id": str, 
+    "conversation_id":str,
+    "author_id":str,
+    #"created_at":str,
+    #"retrieved_at":str, 
+    "source":str,
+    "lang":str,
+    "text":str,
+    "reference_type":str,
+    "referenced_tweet_id":str,
+    #"author.created_at":str,
+    "author.location":str, 
+    "author.name":str, 
+    "author.username":str, 
+    "author.verified":str, 
+    "author.protected":str,
+    "author.public_metrics.followers_count":float, 
+    "author.public_metrics.following_count":float,
+    "author.public_metrics.tweet_count":float,
+    "author.public_metrics.listed_count":float}
 
 EXPANSIONS = ["author_id"]
 
@@ -117,3 +140,23 @@ def dump_tweets(tweets, t1, t2, dst, uid, gid):
             f.write(json_bytes)
             
     os.chown(join(dst, daydirname, hourdirname, fname), uid, gid)
+    
+    
+def get_hour_files(hour_dst):
+    all_hour_files = os.listdir(hour_dst)
+    hour_files = [f for f in all_hour_files if f.endswith(".csv")]
+    
+    if len(all_hour_files) != len(hour_files):
+        print(f"too many files in {hour_dst}")
+        
+    hour_tweets = pd.DataFrame()
+    for f in hour_files:
+        tmp = pd.read_csv(
+            join(hour_dst, f), 
+            error_bad_lines=False, 
+            dtype=DTYPES, 
+            parse_dates=["created_at", "retrieved_at", "author.created_at"]
+        )
+        hour_tweets = pd.concat([hour_tweets, tmp])
+    hour_tweets = hour_tweets.reset_index(drop=True)
+    return hour_tweets

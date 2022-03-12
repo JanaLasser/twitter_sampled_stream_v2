@@ -1,67 +1,75 @@
-import json
-from os import listdir
 import os
-import datetime
 from os.path import join
-import lzma
+import datetime
+import pandas as pd
+import numpy as np
+import shutil
+import sampled_stream_functions as ssf
+import sys
 
-def load_json_tweets(fname, src):
-    json_tweets = []
-    with lzma.open(join(src, fname), 'rb') as f:
-        for json_bytes in f.readlines():
-            try:
-                json_str = json_bytes.decode('utf-8')
-                json_tweet = json.loads(json_str)   
-                json_tweets.append(json_tweet)
-            except json.JSONDecodeError:
-                print(f"JSONDecodeError for file {fname}")
-    #print(f"loaded {len(json_tweets)} tweets")
-    return json_tweets
+#try:
+#    hourdiff = int(sys.argv[1])
+#except IndexError:
+#    hourdiff = 1
 
+src = "/data/twitter_sampled_stream_v2/"
+prev_hour = datetime.datetime.today() - datetime.timedelta(hours=1)
+day = "{}-{:02d}-{:02d}"\
+    .format(prev_hour.year, prev_hour.month, prev_hour.day)
+hour = prev_hour.hour
 
-def dump_hour_tweets(tweets, t1, t2, dst):
-    '''Save a list of tweets as xz compressed json'''
+if not os.path.exists(join(src, day)):
+    # create folder for the day if it doesn't exist yet
+    os.mkdir(join(src, day))
+    
+    # write header in the report file for the day
+    with open(join(src, day, f"{day}_report.txt"), "a") as report_file:
+        report_file.write(f"hour\tserv 1\tserv 2\ttotal\tdiff\tdiff %\n")
         
-    fname = f"sampled_stream_{t1}_to_{t2}.xz"
 
-    with lzma.open(join(dst, fname), 'wb') as f:
-        for tweet in tweets:
-            json_str = json.dumps(tweet) + "\n"
-            json_bytes = json_str.encode('utf-8')
-            f.write(json_bytes)     
+# get the tweets for the given hour from both servers
+hourdirname = "{:02d}".format(str(hour))
+tmp1 = ssf.get_hour_files(join(src, "tmp1", day, hourdirname))
+tmp2 = ssf.get_hour_files(join(src, "tmp2", day, hourdirname))
 
-            
-dst = "data"
+# Extract the tweet IDs from bot datasets and calculate the difference
+# Note: the difference between the two data sets can occur because
+# (1) one server went offline for a while
+# (2) the servers are dumping tweets every minute and might include some
+#     tweets from the previous hour in the dump
+# (3) the sampled stream was backfilling and captured tweets from the
+#     previous hour
+ids1 = set(tmp1["id"])
+ids2 = set(tmp2["id"])
+diff = len(ids1.symmetric_difference(ids2))
 
-yesterday = datetime.datetime.today() - datetime.timedelta(days=1)
-hours = range(1, 25)
+# combine the tweets from the two servers into one dataset that has all tweets
+hour_tweets = pd.concat([tmp1, tmp2[~tmp2["id"].isin(tmp1["id"])]])\
+    .drop_duplicates(subset=["id"])
+N = len(hour_tweets)
 
-daydirname = "{}-{:02d}-{:02d}"\
-        .format(yesterday.year, yesterday.month, yesterday.day)
+# write the stats of the current hour into the report
+print(f"{hour}\t{len(ids1)}\t{len(ids2)}\t{N}\t{diff}\t{round(diff/N * 100, 2)}%")
+with open(join(src, day, f"{day}_report.txt"), "a") as report_file:
+    report_file.write(f"{hour}\t{len(ids1)}\t{len(ids2)}\t{N}\t{diff}\t{round(diff/N * 100, 2)}%\n")
 
+# extract unique users, keep user stats from the most recent post in case there is 
+# more than one tweet by the same user
+hour_users = hour_tweets[ssf.AUTHOR_COLS + ["created_at"]]\
+    .sort_values(by="created_at", ascending=False)\
+    .drop_duplicates(subset=["author_id"])\
+    .drop(columns=["created_at"])
 
-for hour in hours:
-    if os.path.exists(join(dst, daydirname, str(hour))):
-        files = listdir(join(dst, daydirname, str(hour)))
-        files.sort()
-        start = files[0].split("_")
-        start = "{}_{}".format(start[2], start[3])
-        end = files[-1].split("_")
-        end = "{}_{}".format(end[5], end[6].split(".")[0])
-        
-        json_tweets = []
-        for f in files:
-            json_tweets.extend(\
-                    load_json_tweets(f, join(dst, daydirname, str(hour))))
-            
-        print(f"day {daydirname}, hour {hour}, total: {len(json_tweets)} tweets")
-        
-        dump_hour_tweets(json_tweets, start, end, join(dst, daydirname, str(hour)))
-        
-        for f in files:
-            os.remove(join(dst, daydirname, str(hour), f))
+# save tweet IDs, unique users and tweets
+np.savetxt(join(src, day, "{}_{:02d}_IDs.txt.xz".format(day, hour)),
+           hour_tweets["id"].values, fmt="%s")
 
+hour_users.to_csv(join(src, day, "{}_{:02d}_users.csv.xz".format(day, hour)),
+          compression="xz", index=False)
 
+hour_tweets.to_csv(join(src, day, "{}_{:02d}_tweets.csv.xz".format(day, hour)),
+          compression="xz", index=False)
 
-
-
+# clean up
+shutil.rmtree(join(src, "tmp1", day, houridrname))
+shutil.rmtree(join(src, "tmp2", day, hourdirname))

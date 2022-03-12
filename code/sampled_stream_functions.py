@@ -124,7 +124,7 @@ def dump_tweets(tweets, t1, t2, dst, uid, gid):
     '''Save a list of tweets as binary line-separated json'''
     
     daydirname = "{}-{:02d}-{:02d}".format(t1.year, t1.month, t1.day)
-    hourdirname = "{:02d}".format(str(t1.hour))
+    hourdirname = "{:02d}".format(t1.hour)
 
     if not os.path.exists(join(dst, daydirname)):
         os.mkdir(join(dst, daydirname))

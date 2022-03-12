@@ -28,7 +28,7 @@ if not os.path.exists(join(src, day)):
         
 
 # get the tweets for the given hour from both servers
-hourdirname = "{:02d}".format(str(hour))
+hourdirname = "{:02d}".format(hour)
 tmp1 = ssf.get_hour_files(join(src, "tmp1", day, hourdirname))
 tmp2 = ssf.get_hour_files(join(src, "tmp2", day, hourdirname))
 

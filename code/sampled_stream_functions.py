@@ -43,6 +43,8 @@ TWEET_FIELDS = [
     #"withheld",
 ]
 
+EXPANSIONS = ["author_id"]
+
 DTYPES = {
     "id": str, 
     "conversation_id":str,
@@ -65,7 +67,14 @@ DTYPES = {
     "author.public_metrics.tweet_count":float,
     "author.public_metrics.listed_count":float}
 
-EXPANSIONS = ["author_id"]
+AUTHOR_COLS = [
+    "author_id", "lang", "author.created_at", "author.location",
+    "author.name", "author.username", "author.verified",
+    "author.protected", "author.public_metrics.followers_count",
+    "author.public_metrics.following_count",
+    "author.public_metrics.tweet_count",
+    "author.public_metrics.listed_count"]
+
 
 def get_twitter_API_credentials(name="jana", keydst="twitter_API_keys"):
     '''
@@ -115,7 +124,7 @@ def dump_tweets(tweets, t1, t2, dst, uid, gid):
     '''Save a list of tweets as binary line-separated json'''
     
     daydirname = "{}-{:02d}-{:02d}".format(t1.year, t1.month, t1.day)
-    hourdirname = str(t1.hour)
+    hourdirname = "{:02d}".format(str(t1.hour))
 
     if not os.path.exists(join(dst, daydirname)):
         os.mkdir(join(dst, daydirname))
@@ -153,7 +162,7 @@ def get_hour_files(hour_dst):
     for f in hour_files:
         tmp = pd.read_csv(
             join(hour_dst, f), 
-            error_bad_lines=False, 
+            #error_bad_lines=False, 
             dtype=DTYPES, 
             parse_dates=["created_at", "retrieved_at", "author.created_at"]
         )

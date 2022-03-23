@@ -26,21 +26,23 @@ The script is run as a systemd service to ensure it starts again if it terminate
 
 The systemd unit file for this service should look something like this:
 
-`
-[Unit]
-Description=Twitter sampled stream data collection
-After=multi-user.target
-StartLimitIntervalSec=0
+```
+{
+    [Unit]
+    Description=Twitter sampled stream data collection
+    After=multi-user.target
+    StartLimitIntervalSec=0
 
-[Service]
-Type=simple
-Restart=always
-ExecStart=[PATH_TO_PYTHON_EXECUTABLE] [PATH_TO_REPOSITORY]/get_sampled_stream.py
-RestartSec=3
+    [Service]
+    Type=simple
+    Restart=always
+    ExecStart=[PATH_TO_PYTHON_EXECUTABLE] [PATH_TO_REPOSITORY]/get_sampled_stream.py
+    RestartSec=3
 
-[Install]
-WantedBy=multi-user.target
-`
+    [Install]
+    WantedBy=multi-user.target
+}
+```
 
 Notes:
 * Make sure the correct path to the python executable is supplied.

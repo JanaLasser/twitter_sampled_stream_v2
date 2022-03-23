@@ -6,18 +6,19 @@ The connection to the sampled stream is set up in parallel at two separate serve
 
 ## Setup [documentation is work in progress]
 ### Server settings
-The various scripts will look for a file named `server_settings.txt` in the `/code` directory of this repository. This file collects all information relevant to run the scripts at the given server and should contain the following line-separated information (below I give examples, you need to replace them with the correct values for your server):
+The various scripts will look for a file named `server_settings.txt` in the `/code` directory of this repository. This file collects all information relevant to run the scripts at the given server and should contain the following line-separated information. See also the [example settings](https://github.com/JanaLasser/twitter_sampled_stream_v2/blob/main/code/server_settings.txt) uploaded in this repo.
 
-library_dst=/home/jana/anaconda3/lib/python3.8/site-packages 
-API_key_dst=/home/jana/Projects/utilities/twitter_API_keys
-OSF_key_dst=/home/jana/Projects/utilities/OSF
-data_storage_dst=/home/jana/Projects/CSS_sampled_stream/tmp
-data_vault_dst=/home/jana/Projects/CSS_sampled_stream/data
-username=jana
-groupname=jana
-
-* `library_dst` is the path to the packages installed for your local python executable.
-* `API_key_dst` is the path to a directory that contains the access information for your academic twitter API access. 
+* `library_dst`: path to the packages installed for your local python executable.
+* `API_key_dst`: path to a directory that contains the access information for your academic twitter API access. 
+* `API_key_filename`: name of the file in which the API key is stored
+* `email_credentials_dst`: path to a directory that contains the credentials for your email server (not necessary for setup without notification)
+* `email_credentials_filename`: name of the file in which the email server credentials are stored (not necessary for setup without notification)
+* `data_storage_dst`: path to the folder in which the data from the twitter API is (temporarily) stored
+* `username`: ownership of files will be changed from root to the provided username
+* `groupname`: ownership of files will be changed from root to the provided groupname
+* `OSF_key_dst`: path to a directory that contains the access information for OSF (not necessary for setup without OSF upload, only necessary on server 1)
+* `OSF_key_filename`: name of the file in which the OSF access credentials are stored (not necessary for setup without OSF upload, only necessary on server 1)
+* `data_vault_dst`: path to the folder in which the post-processed data will be stored (only necessary on server 1)
 
 ### Connection to the sampled stream
 Connection to the sampled stream endpoing from the Twitter API is handled in the script `get_sampled_stream.py`.
@@ -25,6 +26,7 @@ The script is run as a systemd service to ensure it starts again if it terminate
 
 The systemd unit file for this service should look something like this:
 
+`
 [Unit]
 Description=Twitter sampled stream data collection
 After=multi-user.target
@@ -38,6 +40,7 @@ RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
+`
 
 Notes:
 * Make sure the correct path to the python executable is supplied.

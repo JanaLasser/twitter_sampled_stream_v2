@@ -7,12 +7,13 @@ import shutil
 import sampled_stream_functions as ssf
 import sys
 
-#try:
-#    hourdiff = int(sys.argv[1])
-#except IndexError:
-#    hourdiff = 1
+cwd = sys.argv[1] 
+server_settings = {}
+with open(join(cwd, "server_settings.txt"), 'r') as f:
+    for l in f:
+        server_settings[l.split('=')[0]] = l.split('=')[1].strip('\n')
+src = server_settings["data_vault_dst"]
 
-src = "/data/twitter_sampled_stream_v2/"
 prev_hour = datetime.datetime.today() - datetime.timedelta(hours=1)
 day = "{}-{:02d}-{:02d}"\
     .format(prev_hour.year, prev_hour.month, prev_hour.day)

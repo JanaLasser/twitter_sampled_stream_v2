@@ -4,7 +4,7 @@ Code collects the tweets delivered by the Twitter API v2 [sampled stream](https:
 ## Data collection architecture
 The connection to the sampled stream is set up in parallel at two separate servers (server 1 and server 2) to provide redundancy if one of the server flatlines for some reason. If you want to implement a similar setup, you will have to clone this repository and go through the setup instructions on both servers. One of the servers (server 1) is the "main" server that collects and post-processes all data, reports if things go wrong and uploads the tweet IDs to the OSF repository every hour.  
 
-## Setup
+## Setup [documentation is work in progress]
 ### Server settings
 The various scripts will look for a file named `server_settings.txt` in the `/code` directory of this repository. This file collects all information relevant to run the scripts at the given server and should contain the following line-separated information (below I give examples, you need to replace them with the correct values for your server):
 

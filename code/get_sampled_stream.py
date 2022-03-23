@@ -25,6 +25,11 @@ from twarc.expansions import flatten
 # custom functions for the stream scraper
 import sampled_stream_functions as ssf
 
+notifications = server_settings["notifications"]
+notifications = {"True":True, "False":False}[notifications]
+if notifications:
+    email_credentials_dst = server_settings["email_credentials_dst"]
+    email_credentials_filename = server_settings["email_credentials_filename"]
 
 API_key_dst = server_settings["API_key_dst"]
 data_storage_dst = server_settings["data_storage_dst"]
@@ -33,8 +38,10 @@ groupname = server_settings["groupname"]
 uid = pwd.getpwnam(username).pw_uid
 gid = grp.getgrnam(groupname).gr_gid
 host = socket.gethostname()
-API_key_name = "jana"
-credentials = ssf.get_twitter_API_credentials(API_key_name, keydst=API_key_dst)
+API_key_filename = server_settings["API_key_filename"]
+credentials = ssf.get_twitter_API_credentials(
+    filename=API_key_filename, 
+    keydst=API_key_dst)
 bearer_token = credentials["bearer_token"]
 client = Twarc2(bearer_token=bearer_token)
 
@@ -42,11 +49,16 @@ dumptime = 60 # time [in seconds] at which the stream is dumped to disk
 
 tweets = []
 start = datetime.datetime.now()
-ssf.notify(
-    f"[NOTICE] started sampled stream on {host}!",
-    str(start), 
-    credential_src=cwd
-)
+
+if notifications:
+    ssf.notify(
+        f"[NOTICE] started sampled stream on {host}!",
+        str(start), 
+        credential_src=email_credentials_dst,
+        credential_fname=email_credentials_filename
+    )
+else:
+    print(f"[NOTICE] started sampled stream on {host}!")
 
 try:
     while True:
@@ -81,10 +93,14 @@ try:
                 start = datetime.datetime.now()
                 
 except Exception as e:
-    ssf.notify(
-        f"[WARNING] sampled stream terminated on {host}!",
-        str(e),
-        credential_src=cwd
-    )
+    if notifications:
+        ssf.notify(
+            f"[WARNING] sampled stream terminated on {host}!",
+            str(e),
+            credential_src=email_credentials_dst,
+            credential_fname=email_credentials_filename
+        )
+    else:
+        print(f"[WARNING] sampled stream terminated on {host}!")
         
         

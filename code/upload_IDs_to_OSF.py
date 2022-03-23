@@ -56,4 +56,4 @@ for fname in [fname_IDs, fname_report]:
             except FileExistsError:
                 print(f"not writing {fname} because file exists at OSF")
     else:
-        print(f"not uploading {fname} because file doesn't exist locally")
+        print(f"not uploading {join(local_path, fname)} because file doesn't exist locally")

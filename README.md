@@ -4,7 +4,7 @@ Code collects the tweets delivered by the Twitter API v2 [sampled stream](https:
 ## Data collection architecture
 The connection to the sampled stream is set up in parallel at two separate servers (server 1 and server 2) to provide redundancy if one of the server flatlines for some reason. If you want to implement a similar setup, you will have to clone this repository and go through the setup instructions on both servers. One of the servers (server 1) is the "main" server that collects and post-processes all data, reports if things go wrong and uploads the tweet IDs to the OSF repository every hour.  
 
-## Setup [documentation is work in progress]
+## Redundant setup [documentation is work in progress]
 ### Server settings
 The various scripts will look for a file named `server_settings.txt` in the `/code` directory of this repository. This file collects all information relevant to run the scripts at the given server and should contain the following line-separated information. See also the [example settings](https://github.com/JanaLasser/twitter_sampled_stream_v2/blob/main/code/server_settings.txt) uploaded in this repo.
 
@@ -22,12 +22,11 @@ The various scripts will look for a file named `server_settings.txt` in the `/co
 
 ### Connection to the sampled stream
 Connection to the sampled stream endpoing from the Twitter API is handled in the script `get_sampled_stream.py`.
-The script is run as a systemd service to ensure it starts again if it terminates for some reason or the server reboots. See [this guide](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267) on how to set up a systemd service.
+The script is run as a systemd service to ensure it starts again if it terminates for some reason or the server reboots. Make sure to set this up on **both servers** in the redundant setup. See [this guide](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267) on how to set up a systemd service.
 
 The systemd unit file for this service should look something like this:
 
 ```
-{
     [Unit]
     Description=Twitter sampled stream data collection
     After=multi-user.target
@@ -41,29 +40,30 @@ The systemd unit file for this service should look something like this:
 
     [Install]
     WantedBy=multi-user.target
-}
 ```
 
 Notes:
-* Make sure the correct path to the python executable is supplied.
-* Make sure the location of twarc is in the pythonpath, since `get_sampled_stream.py` needs twarc to run.
+* Make sure you have updated the `server_settings.txt` file to correspond to your server's setup.
+* Make sure the correct path to the python executable is supplied in the `ExecStart` variable.
+* Make sure the location of twarc is in the system's pythonpath, since `get_sampled_stream.py` needs twarc to run.
 * Systemd services run as root. I tried to get them working for a user but failed. Mainly because the service then wouldn't start at machine reboot.
 * Files created by the python script run as a service are owned by root. File ownership is changed to the supplied user later in the `collect_data.py` script.
 * Test if the systemd service is running: `systemctl is-active <service name> >/dev/null 2>&1 && echo YES || echo NO`
+
+If `get_sampled_stream.py` is working correctly, it will create one folder for every day at `data_storage_dst`, specified in the `server_settings.txt` file. Within that folder, an subfolder will be created for every hour of the day. In that subfolder, the raw JSON payload from the Twitter API will be saved every minute.
     
 ### Redundant data collection
-The script `send_data.sh` needs to be hooked up to a (user) cronjob that runs every hour shortly after the full hour:
+The script `send_data.sh` is intended to run **only on server 2**. It sends the raw JSON data over to server 1 every hour using `rsync` and deletes the data on server 2. The script needs to be hooked up to a (user) cronjob that runs every hour shortly after the full hour to ensure that the last writing operation for the hour has been completed. An entry in the crontab that also pipes stdout and sterr to the file `send_data.log` looks like this (make sure to adapt the paths to your server's setup):  
 `7 * * * * /home/<user>/twitter_sampled_stream_v2/code/send_data.sh > /home/<user>/twitter_sampled_stream_v2/code/send_data.log 2>&1`
     
+    
+### Data post-processing
 Note: the file structure is like below, with one folder for every day, and individual data files for every hour of the given day. Note that the days and hours refer to the CET time zone, while the timestamps inside the data (`created_at`, `retrieved_at` and `author.created_at`) refer to UTZ.
 `YYYY-mm-dd`
     `YYYY-mm-dd_hh_IDs.txt.xz`
     `YYYY-mm-dd_hh_users.csv.xz`
     `YYYY-mm-dd_hh_tweets.csv.xz`
     `...`
-    
-### Data post-processing
-TODO
 
 ### Data upload to OSF
 TODO

@@ -16,8 +16,8 @@ with open(join(cwd, "server_settings.txt"), 'r') as f:
 
 # file I/O paths and folder names
 src = server_settings["data_storage_dst"]
-#prev_hour = datetime.datetime.today() - datetime.timedelta(hours=1)
-prev_hour = datetime.datetime.strptime('2022-03-11 02:00:00', '%Y-%m-%d %H:%M:%S')
+prev_hour = datetime.datetime.today() - datetime.timedelta(hours=1)
+#prev_hour = datetime.datetime.strptime('2022-03-11 02:00:00', '%Y-%m-%d %H:%M:%S')
 yearmonthday = "{}-{:02d}-{:02d}"\
     .format(prev_hour.year, prev_hour.month, prev_hour.day)
 year = "{:04d}".format(prev_hour.year)
@@ -55,3 +55,5 @@ for fname in [fname_IDs, fname_report]:
                 store.create_file(join(remote_path, fname), fp)
             except FileExistsError:
                 print(f"not writing {fname} because file exists at OSF")
+    else:
+        print(f"not uploading {fname} because file doesn't exist locally")

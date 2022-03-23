@@ -15,7 +15,7 @@ with open(join(cwd, "server_settings.txt"), 'r') as f:
         server_settings[l.split('=')[0]] = l.split('=')[1].strip('\n')
 
 # file I/O paths and folder names
-src = server_settings["data_storage_dst"]
+src = server_settings["data_vault_dst"]
 prev_hour = datetime.datetime.today() - datetime.timedelta(hours=1)
 #prev_hour = datetime.datetime.strptime('2022-03-11 02:00:00', '%Y-%m-%d %H:%M:%S')
 yearmonthday = "{}-{:02d}-{:02d}"\

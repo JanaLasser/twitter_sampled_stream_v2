@@ -1,0 +1,11 @@
+library_dst=/home/jana/anaconda3/lib/python3.8/site-packages
+API_key_dst=/home/jana/Projects/utilities/twitter_API_keys
+API_key_filename=twitter_API_jana.txt
+email_credentials_dst=/home/jana/Projects/utilities/email
+email_credentials_filename=email_credentials.txt
+data_storage_dst=/home/jana/Projects/CSS_sampled_stream/data
+username=jana
+groupname=jana
+OSF_key_dst=/home/jana/Projects/utilities/OSF
+OSF_key_filename=osf_credentials.txt
+data_vault_dst=/home/jana/Projects/CSS_sampled_stream/data

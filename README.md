@@ -4,7 +4,7 @@ Code collects the tweets delivered by the Twitter API v2 [sampled stream](https:
 ## Data collection architecture
 The connection to the sampled stream is set up in parallel at two separate servers (server 1 and server 2) to provide redundancy if one of the server flatlines for some reason. If you want to implement a similar setup, you will have to clone this repository and go through the setup instructions on both servers. One of the servers (server 1) is the "main" server that collects and post-processes all data, reports if things go wrong and uploads the tweet IDs to the OSF repository every hour.  
 
-## Redundant setup [documentation is work in progress]
+## Redundant setup
 ### Server settings
 The various scripts will look for a file named `server_settings.txt` in the `/code` directory of this repository. This file collects all information relevant to run the scripts at the given server and should contain the following line-separated information. See also the [example settings](https://github.com/JanaLasser/twitter_sampled_stream_v2/blob/main/code/server_settings.txt) uploaded in this repo.
 
@@ -85,8 +85,13 @@ The file structure in `data_vault_dst` is like below, with one folder for every 
         ...
 ```
 
-## Setup without redundant server
-TODO
+## Setup without redundant server [untested]
+* Replace `collect_data.py` with `collect_data_nonredundant.py` in the script `process_hour_tweets.sh`. 
+* Do not set up the cronjob for the `send_data.sh` script on server 2.
 
-## Setup without email notifications
-TODO
+## Setup without email notifications [untested]
+* Set `notifications=False` in the `server_settings.txt` file. 
+* Do not set up the cronjob for the `send_day_report.py` script.
+
+## Setup without OSF upload
+Remove the last line from the script `process_hour_tweets.sh`

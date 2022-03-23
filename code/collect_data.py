@@ -72,5 +72,5 @@ hour_tweets.to_csv(join(src, day, "{}_{:02d}_tweets.csv.xz".format(day, hour)),
           compression="xz", index=False)
 
 # clean up
-shutil.rmtree(join(src, "tmp1", day, houridrname))
+shutil.rmtree(join(src, "tmp1", day, hourdirname))
 shutil.rmtree(join(src, "tmp2", day, hourdirname))

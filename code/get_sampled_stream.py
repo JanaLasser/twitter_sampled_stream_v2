@@ -15,9 +15,10 @@ server_settings = {}
 with open(join(cwd, "server_settings.txt"), 'r') as f:
     for l in f:
         server_settings[l.split('=')[0]] = l.split('=')[1].strip('\n')
+server = server_settings["SERVER"]
 
 # insert the library destination into the pythonpath and load third-party libs
-sys.path.insert(0, server_settings["library_dst"])
+sys.path.insert(0, server_settings["PYTHON_LIBRARY_DST"])
 import pandas as pd
 from twarc import Twarc2
 from twarc.expansions import flatten
@@ -25,20 +26,20 @@ from twarc.expansions import flatten
 # custom functions for the stream scraper
 import sampled_stream_functions as ssf
 
-notifications = server_settings["notifications"]
+notifications = server_settings["NOTIFICATIONS"]
 notifications = {"True":True, "False":False}[notifications]
 if notifications:
-    email_credentials_dst = server_settings["email_credentials_dst"]
-    email_credentials_filename = server_settings["email_credentials_filename"]
+    email_credentials_dst = server_settings["EMAIL_CREDENTIALS_DST"]
+    email_credentials_filename = server_settings["EMAIL_CREDENTIALS_FILENAME"]
 
-API_key_dst = server_settings["API_key_dst"]
-data_storage_dst = server_settings["data_storage_dst"]
-username = server_settings["username"]
-groupname = server_settings["groupname"]
+API_key_dst = server_settings["TWITTER_API_KEY_DST"]
+API_key_filename = server_settings["TWITTER_API_KEY_FILENAME"]
+data_storage_dst = server_settings[f"TMP_STORAGE_SERVER_{SERVER}"]
+username = server_settings["USERNAME"]
+groupname = server_settings["GROUPNAME"]
 uid = pwd.getpwnam(username).pw_uid
 gid = grp.getgrnam(groupname).gr_gid
 host = socket.gethostname()
-API_key_filename = server_settings["API_key_filename"]
 credentials = ssf.get_twitter_API_credentials(
     filename=API_key_filename, 
     keydst=API_key_dst)
@@ -49,16 +50,16 @@ dumptime = 60 # time [in seconds] at which the stream is dumped to disk
 
 tweets = []
 start = datetime.datetime.now()
-
++header = f"[NOTICE] started sampled stream on {host}!"
 if notifications:
     ssf.notify(
-        f"[NOTICE] started sampled stream on {host}!",
+        header,
         str(start), 
         credential_src=email_credentials_dst,
         credential_fname=email_credentials_filename
     )
 else:
-    print(f"[NOTICE] started sampled stream on {host}!")
+    print(header)
 
 try:
     while True:
@@ -92,15 +93,16 @@ try:
                 tweets = []
                 start = datetime.datetime.now()
                 
+header = f"[WARNING] sampled stream terminated on {host}!"
 except Exception as e:
     if notifications:
         ssf.notify(
-            f"[WARNING] sampled stream terminated on {host}!",
+            header,
             str(e),
             credential_src=email_credentials_dst,
             credential_fname=email_credentials_filename
         )
     else:
-        print(f"[WARNING] sampled stream terminated on {host}!")
+        print(header)
         
         

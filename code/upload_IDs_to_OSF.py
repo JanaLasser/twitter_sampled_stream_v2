@@ -15,7 +15,7 @@ with open(join(cwd, "server_settings.txt"), 'r') as f:
         server_settings[l.split('=')[0]] = l.split('=')[1].strip('\n')
 
 # file I/O paths and folder names
-src = server_settings["data_vault_dst"]
+src = server_settings["DATA_VAULT_DST"]
 prev_hour = datetime.datetime.today() - datetime.timedelta(hours=1)
 yearmonthday = "{}-{:02d}-{:02d}"\
     .format(prev_hour.year, prev_hour.month, prev_hour.day)
@@ -29,7 +29,9 @@ remote_path = join(year, month, day)
 ## set up the OSF client ##
 # load the credentials
 osf_credentials = {}
-with open(join(server_settings["OSF_key_dst"],"osf_credentials.txt"), "r") as credfile:
+with open(
+    join(server_settings["OSF_KEY_DST"],
+         server_settings["OSF_KEY_FILENAME"]), "r") as credfile:
     for l in credfile:
         osf_credentials[l.split("=")[0]] = l.split("=")[1].strip("\n")     
 

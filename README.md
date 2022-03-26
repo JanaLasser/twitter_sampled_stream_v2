@@ -60,7 +60,11 @@ If `get_sampled_stream.py` exits its main execution loop, something has gone wro
 `0 2 * * * <path_to_python_executable>/python <path_to_repository>/code/send_day_report.py`
     
 ### Redundant data collection
-The script `send_data.sh` is intended to run **only on server 2**. It sends the raw JSON data over to server 1 every hour using `rsync` and deletes the data on server 2. The script needs to be hooked up to a (user) cronjob that runs every hour shortly after the full hour to ensure that the last writing operation for the hour has been completed. An entry in the crontab that also pipes stdout and sterr to the file `send_data.log` looks like this (make sure to adapt the paths to your server's setup):  
+**Note:** For this to work you will need to be able to connect to server 2 from server 1 to copy data, if possible via ssh but scp will also work but require adapting the script `send_data.sh`.  
+
+The script `send_data.sh` is intended to run **only on server 2**. It sends the raw JSON data over to server 1 every hour using `rsync` and deletes the data on server 2. Make sure to adapt this script with your ssh credentials to access server 1 from server 2 and the correct file path on server 2.
+
+The script needs to be hooked up to a (user) cronjob that runs every hour shortly after the full hour to ensure that the last writing operation for the hour has been completed. An entry in the crontab that also pipes stdout and sterr to the file `send_data.log` looks like this (make sure to adapt the paths to your server's setup):  
 
 `7 * * * * <path_to_repository>/code/send_data.sh > <path_to_repository>/code/send_data.log 2>&1`
     
@@ -86,10 +90,11 @@ The file structure in `data_vault_dst` is like below, with one folder for every 
 ```
 
 ## Setup without redundant server [untested]
+* Replace `parse_json_tweets.py` with `parse_json_tweets_nonredundant.py` in the script `process_hour_tweets.sh`. 
 * Replace `collect_data.py` with `collect_data_nonredundant.py` in the script `process_hour_tweets.sh`. 
 * Do not set up the cronjob for the `send_data.sh` script on server 2.
 
-## Setup without email notifications [untested]
+## Setup without email notifications
 * Set `notifications=False` in the `server_settings.txt` file. 
 * Do not set up the cronjob for the `send_day_report.py` script.
 

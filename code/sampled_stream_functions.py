@@ -164,7 +164,7 @@ def classify_users(t1, t2, dst, m3params):
     fname = f"sampled_stream_{datetime1}_to_{datetime2}.jsonl"    
     
     scriptname = "run_m3_classification.sh"
-    scriptpath = "/home/jana/Projects/CSS_sampled_stream/code/"
+    scriptpath = m3params["scriptpath"]
     fpath = join(dst, daydirname, hourdirname)
     m3path = m3params["m3path"]
     keyfile = m3params["keyfile"]

@@ -34,7 +34,7 @@ if notifications:
 
 API_key_dst = server_settings["TWITTER_API_KEY_DST"]
 API_key_filename = server_settings["TWITTER_API_KEY_FILENAME"]
-data_storage_dst = server_settings[f"TMP_STORAGE_SERVER_{SERVER}"]
+data_storage_dst = server_settings[f"TMP_STORAGE_SERVER_{server}"]
 username = server_settings["USERNAME"]
 groupname = server_settings["GROUPNAME"]
 uid = pwd.getpwnam(username).pw_uid

@@ -1,5 +1,8 @@
 #!/bin/bash
-/home/jlasser/twitter_sampled_stream_v2/code/parse_json_tweets.sh
-/usr/local/anaconda3/bin/python /home/jlasser/twitter_sampled_stream_v2/code/collect_data.py /home/jlasser/twitter_sampled_stream_v2/code/
-/usr/local/anaconda3/bin/python /home/jlasser/twitter_sampled_stream_v2/code/upload_IDs_to_OSF.py /home/jlasser/twitter_sampled_stream_v2/code/
+cd /home/jlasser/twitter_sampled_stream_v2/code
+source server_settings.txt
+
+./parse_json_tweets.sh
+$PYTHON_DST/python collect_data.py $REPOSITORY_DST/code/
+$PYTHON_DST/python upload_IDs_to_OSF.py $REPOSITORY_DST/code/
 

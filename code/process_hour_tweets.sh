@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/jlasser/twitter_sampled_stream_v2/code
+cd /home/jlasser/twitter_sampled_stream_v2_test/code
 source server_settings.txt
 
 ./parse_json_tweets.sh

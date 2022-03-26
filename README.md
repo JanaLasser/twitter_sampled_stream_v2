@@ -8,17 +8,22 @@ The connection to the sampled stream is set up in parallel at two separate serve
 ### Server settings
 The various scripts will look for a file named `server_settings.txt` in the `/code` directory of this repository. This file collects all information relevant to run the scripts at the given server and should contain the following line-separated information. See also the [example settings](https://github.com/JanaLasser/twitter_sampled_stream_v2/blob/main/code/server_settings.txt) uploaded in this repo.
 
-* `library_dst`: path to the packages installed for your local python executable.
-* `API_key_dst`: path to a directory that contains the access information for your academic twitter API access. 
-* `API_key_filename`: name of the file in which the API key is stored
-* `email_credentials_dst`: path to a directory that contains the credentials for your email server (not necessary for setup without notification)
-* `email_credentials_filename`: name of the file in which the email server credentials are stored (not necessary for setup without notification)
-* `data_storage_dst`: path to the folder in which the data from the twitter API is (temporarily) stored
-* `username`: ownership of files will be changed from root to the provided username
-* `groupname`: ownership of files will be changed from root to the provided groupname
-* `OSF_key_dst`: path to a directory that contains the access information for OSF (not necessary for setup without OSF upload, only necessary on server 1)
-* `OSF_key_filename`: name of the file in which the OSF access credentials are stored (not necessary for setup without OSF upload, only necessary on server 1)
-* `data_vault_dst`: path to the folder in which the post-processed data will be stored (only necessary on server 1)
+* `SERVER`: should be set to "1" or "2" and tells various scripts which paths to use.
+* `PYTHON_DST`: path to your systems python executable.
+* `PYTHON_LIBRARY_DST`: path to the packages installed for your local python executable.
+* `TWITTER_API_KEY_DST`: path to a directory that contains the access information for your academic twitter API access. 
+* `TWITTER_API_KEY_FILENAME`: name of the file in which the API key is stored.
+* `NOTIFICATIONS`: should be set to "True" or "False". Turns email notifications on or off.
+* `EMAIL_CREDENTIALS_DST`: path to a directory that contains the credentials for your email server (only necessary if `NOTIFICATIONS=TRUE`).
+* `EMAIL_CREDENTIALS_FILENAME`: name of the file in which the email server credentials are stored (only necessary if `NOTIFICATIONS=TRUE`).
+* `TMP_STORAGE_SERVER_1`: path to the folder in which the data from the twitter API collected on server 1 is temporarily stored. Note: `get_sampled_stream.py` will check which `SERVER` it is running on and will choose the path accordingly.
+* `TMP_STORAGE_SERVER_2`: path to the folder in which the data from the twitter API collected on server 2 is temporarily stored. Note: for server 1, this should be set to the folder to which the files from server 2 are copied, since `collect_data.py`, which is run on server 1 will look for files there.
+* `REPOSITORY_DST`: path to this repository.
+* `USERNAME`: ownership of files will be changed from root to the provided username.
+* `GROUPNAME`: ownership of files will be changed from root to the provided groupname.
+* `OSF_KEY_DST`: path to a directory that contains the access information for OSF (not necessary for setup without OSF upload, only necessary on server 1)
+* `OSF_KEY_FILENAME`: name of the file in which the OSF access credentials are stored (not necessary for setup without OSF upload, only necessary on server 1)
+* `DATA_VAULT_DST`: path to the folder in which the post-processed data will be stored (only necessary on server 1).
 
 ### Connection to the sampled stream
 Connection to the sampled stream endpoing from the Twitter API is handled in the script `get_sampled_stream.py`.
@@ -47,8 +52,8 @@ Notes:
 * Make sure the correct path to the python executable is supplied in the `ExecStart` variable.
 * Make sure the location of twarc is in the system's pythonpath, since `get_sampled_stream.py` needs twarc to run.
 * Systemd services run as root. I tried to get them working for a user but failed. Mainly because the service then wouldn't start at machine reboot.
-* Files created by the python script run as a service are owned by root. File ownership is changed to the supplied user later in the `collect_data.py` script.
-* Test if the systemd service is running  
+* Files created by the python script run as a service are owned by root. File ownership is changed to the user and group supplied in `server_settings.txt` under `USERNAME` and `GROUPNAME` later in the `collect_data.py` script.
+* Test if the systemd service is running with
 
 `systemctl is-active <service name> >/dev/null 2>&1 && echo YES || echo NO`
 
@@ -62,7 +67,7 @@ If `get_sampled_stream.py` exits its main execution loop, something has gone wro
 ### Redundant data collection
 **Note:** For this to work you will need to be able to connect to server 2 from server 1 to copy data, if possible via ssh but scp will also work but require adapting the script `send_data.sh`.  
 
-The script `send_data.sh` is intended to run **only on server 2**. It sends the raw JSON data over to server 1 every hour using `rsync` and deletes the data on server 2. Make sure to adapt this script with your ssh credentials to access server 1 from server 2 and the correct file path on server 2.
+The script `send_data.sh` is intended to run **only on server 2**. It sends the raw JSON data over to server 1 every hour using `rsync` and deletes the data on server 2. Make sure to adapt this script with your ssh credentials to access server 1 from server 2 and the correct file path on server 1.
 
 The script needs to be hooked up to a (user) cronjob that runs every hour shortly after the full hour to ensure that the last writing operation for the hour has been completed. An entry in the crontab that also pipes stdout and sterr to the file `send_data.log` looks like this (make sure to adapt the paths to your server's setup):  
 
@@ -70,7 +75,9 @@ The script needs to be hooked up to a (user) cronjob that runs every hour shortl
     
     
 ### Data post-processing
-Raw JSON data is post-processed every hour on server 1, to distribute compute load throughout the day. All processing operations are collected in the script `process_hour_tweets.sh`, which calls `parse_json_tweets.sh`, `collect_data.py` and `upload_IDs_to_OSF.py`. Make sure you adapt the paths in `process_hour_tweets.sh` to match your server's setup.
+**Note:** Set the paths at the beginning of the `process_hour_tweets.sh` and `parse_json_tweets.sh` (`parse_json_tweets_nonredundant.sh` for the non-redundant setup) to the correct paths corresponding to your server.  
+
+Raw JSON data is post-processed every hour on server 1, to distribute compute load throughout the day. All processing operations are collected in the script `process_hour_tweets.sh`, which calls `parse_json_tweets.sh`, `collect_data.py` and `upload_IDs_to_OSF.py`. 
 
 * `parse_json_tweets.sh` parses the raw JSON payload and flattens it into comma separated files using the `jq` utility. This is rather efficient and I haven't found the need to parallelize the operation to run on more than one core. Files are saved as `.csv` and the original `.jsonl` file is deleted.
 * `collect_data.py` reads all `.csv` files for the given hour from both servers (there should be one for every minute of the hour) and combines them into two data frames: one from server 1 and the other from server 2. These data frames are then compared based on the unique ID of every tweet and the difference is calculated. This difference alongside the number of tweets from each server and the total number of tweets is written to the report file for the given day. The data from both servers is merged, making sure that tweets that might not have been recorded by one server are supplied by the other server. From the merged data, three files are saved at `data_vault_dst` (specified in `server_settings.txt`) and the original `.csv` files from both servers deleted:

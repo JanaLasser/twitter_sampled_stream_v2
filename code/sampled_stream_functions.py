@@ -165,12 +165,13 @@ def classify_users(t1, t2, dst, m3params):
     
     scriptname = "run_m3_classification.sh"
     scriptpath = m3params["scriptpath"]
-    fpath = join(dst, daydirname, hourdirname)
     m3path = m3params["m3path"]
     keyfile = m3params["keyfile"]
     cachepath = m3params["cachepath"]
     
-    subprocess.Popen([f"{join(scriptpath, scriptname)} {fpath} {fname} {m3path} {keyfile} {cachepath}"], shell=True)
+    # start an asynchronous sub-process to extract user IDs from the tweet json
+    # and run the m3 classifier over the user IDs
+    subprocess.Popen([f"{join(scriptpath, scriptname)} {dst} {daydirname} {hourdirname} {fname} {m3path} {keyfile} {cachepath}"], shell=True)
     
     
 def get_hour_files(hour_dst):

@@ -93,8 +93,8 @@ try:
                 tweets = []
                 start = datetime.datetime.now()
                 
-header = f"[WARNING] sampled stream terminated on {host}!"
 except Exception as e:
+    header = f"[WARNING] sampled stream terminated on {host}!"
     if notifications:
         ssf.notify(
             header,

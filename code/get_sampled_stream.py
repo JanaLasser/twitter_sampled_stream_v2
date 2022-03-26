@@ -108,7 +108,7 @@ try:
                     keyname = keys.pop()
                     keyfile = join(keysrc, f"m3_auth_v1_{keyname}.txt")
                     m3params["keyfile"] = keyfile
-                    ssf.classify_users(start, now, dst, m3params)
+                    ssf.classify_users(start, now, data_storage_dst, m3params)
                     keys = [keyname] + keys
                     
                 tweets = []

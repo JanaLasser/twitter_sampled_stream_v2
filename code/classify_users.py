@@ -23,7 +23,7 @@ preds['age_>=40_prob'] = np.nan
 preds['org_prob'] = np.nan
 preds = preds.set_index("author_id")
 
-outputs = m3Twitter.infer_ids(user_ids, batch_size=100, num_workers=10)[0:100]
+outputs = m3Twitter.infer_ids(user_ids, batch_size=100, num_workers=10)
 
 for output in outputs:
     user_id = output['input']['id']

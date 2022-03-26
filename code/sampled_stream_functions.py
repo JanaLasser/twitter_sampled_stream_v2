@@ -76,26 +76,27 @@ AUTHOR_COLS = [
     "author.public_metrics.listed_count"]
 
 
-def get_twitter_API_credentials(name="jana", keydst="twitter_API_keys"):
+def get_twitter_API_credentials(filename="twitter_API_jana.txt", keydst="twitter_API_keys"):
     '''
     Returns the bearer tokens to access the Twitter v2 API for a list of users.
     '''
     credentials = {}
-    with open(join(keydst, f"twitter_API_{name}.txt"), 'r') as f:
+    with open(join(keydst, filename), 'r') as f:
         for l in f:
             if l.startswith("bearer_token"):
                 credentials[l.split('=')[0]] = l.split('=')[1].strip('\n')
     return credentials
 
 
-def notify(subject, body, credential_src=os.getcwd()):
+def notify(subject, body, credential_src=os.getcwd(), 
+           credential_fname="email_credentials.txt"):
     '''
     Writes an email with the given subject and body from a mailserver specified
     in the email_credentials.txt file at the specified location. The email
     address to send the email to is also specified in the credentials file.
     '''
     email_credentials = {}
-    with open(join(credential_src, "email_credentials.txt"), "r") as f:
+    with open(join(credential_src, credential_fname), "r") as f:
         for line in f.readlines():
             line = line.strip("\n")
             email_credentials[line.split("=")[0]] = line.split("=")[1]

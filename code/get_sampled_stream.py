@@ -49,6 +49,19 @@ client = Twarc2(bearer_token=bearer_token)
 dumptime = 60 # time [in seconds] at which the stream is dumped to disk
 
 tweets = []
+keys = ["max1", "max2", "max3", "max4", "max5", "max6",
+        "alina", "anna", "emma", "hannah", "jana"]
+keysrc = "/home/jlasser/utilities/twitter_API_v1_keys"
+m3params = {
+    "m3path":"/data/twitter_sampled_stream_v2_test/m3_classifications",
+    "cachepath":"/data/twitter_sampled_stream_v2_test/m3_cache",
+    "keyfile":None,
+    "scriptpath":server_settings["REPOSITORY_DST"]
+}
+
+m3classify = server_settings["M3CLASSIFY"]
+m3classify = {"True":True, "False":False}[m3classify]
+
 start = datetime.datetime.now()
 header = f"[NOTICE] started sampled stream on {host}!"
 if notifications:
@@ -90,6 +103,14 @@ try:
             if (start - now).seconds % dumptime == 0: # dump tweets every minute
                 print("dumping tweets")
                 ssf.dump_tweets(tweets, start, now, data_storage_dst, uid, gid)
+                
+                if m3classify:
+                    keyname = keys.pop()
+                    keyfile = join(keysrc, f"m3_auth_v1_{keyname}.txt")
+                    m3params["keyfile"] = keyfile
+                    ssf.classify_users(start, now, dst, m3params)
+                    keys = [keyname] + keys
+                    
                 tweets = []
                 start = datetime.datetime.now()
                 

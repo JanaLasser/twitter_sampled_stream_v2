@@ -50,7 +50,7 @@ dumptime = 60 # time [in seconds] at which the stream is dumped to disk
 
 tweets = []
 start = datetime.datetime.now()
-+header = f"[NOTICE] started sampled stream on {host}!"
+header = f"[NOTICE] started sampled stream on {host}!"
 if notifications:
     ssf.notify(
         header,

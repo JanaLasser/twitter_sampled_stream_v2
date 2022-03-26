@@ -5,6 +5,8 @@ import os
 from os.path import join
 import json
 import pandas as pd
+import subprocess
+
 
 USER_FIELDS = [
     "created_at",
@@ -150,6 +152,25 @@ def dump_tweets(tweets, t1, t2, dst, uid, gid):
             f.write(json_bytes)
             
     os.chown(join(dst, daydirname, hourdirname, fname), uid, gid)
+    
+    
+def classify_users(t1, t2, dst, m3params):
+    daydirname = "{}-{:02d}-{:02d}".format(t1.year, t1.month, t1.day)
+    hourdirname = "{:02d}".format(t1.hour)
+    datetime1 = "{}-{:02d}-{:02d}_{:02d}:{:02d}:{:02d}"\
+        .format(t1.year, t1.month, t1.day, t1.hour, t1.minute, t1.second)
+    datetime2 = "{}-{:02d}-{:02d}_{:02d}:{:02d}:{:02d}"\
+        .format(t2.year, t2.month, t2.day, t2.hour, t2.minute, t2.second)
+    fname = f"sampled_stream_{datetime1}_to_{datetime2}.jsonl"    
+    
+    scriptname = "run_m3_classification.sh"
+    scriptpath = "/home/jana/Projects/CSS_sampled_stream/code/"
+    fpath = join(dst, daydirname, hourdirname)
+    m3path = m3params["m3path"]
+    keyfile = m3params["keyfile"]
+    cachepath = m3params["cachepath"]
+    
+    subprocess.Popen([f"{join(scriptpath, scriptname)} {fpath} {fname} {m3path} {keyfile} {cachepath}"], shell=True)
     
     
 def get_hour_files(hour_dst):

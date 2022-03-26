@@ -56,7 +56,7 @@ m3params = {
     "m3path":"/data/twitter_sampled_stream_v2_test/m3_classifications",
     "cachepath":"/data/twitter_sampled_stream_v2_test/m3_cache",
     "keyfile":None,
-    "scriptpath":server_settings["REPOSITORY_DST"]
+    "scriptpath":join(server_settings["REPOSITORY_DST"], "code")
 }
 
 m3classify = server_settings["M3CLASSIFY"]

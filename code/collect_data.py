@@ -12,7 +12,7 @@ server_settings = {}
 with open(join(cwd, "server_settings.txt"), 'r') as f:
     for l in f:
         server_settings[l.split('=')[0]] = l.split('=')[1].strip('\n')
-src = server_settings["data_vault_dst"]
+src = server_settings["DATA_VAULT_DST"]
 
 prev_hour = datetime.datetime.today() - datetime.timedelta(hours=1)
 day = "{}-{:02d}-{:02d}"\

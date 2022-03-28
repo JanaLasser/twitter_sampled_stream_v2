@@ -13,7 +13,7 @@ m3Twitter = m3inference.M3Twitter(cache_dir=cachepath)
 m3Twitter.twitter_init_from_file(keyfile)
 
 users = pd.read_csv(join(fpath, fname), dtype={"author_id":str})
-user_ids = users["author_id"].values[0:10]
+user_ids = users["author_id"]
 preds = pd.DataFrame({"author_id":user_ids})
 preds['female_prob'] = np.nan
 preds['age_<=18_prob'] = np.nan

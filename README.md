@@ -5,7 +5,7 @@ Code collects the tweets delivered by the Twitter API v2 [sampled stream](https:
 ### Redundancy
 The connection to the sampled stream is set up in parallel at two separate servers (server 1 and server 2) to provide redundancy if one of the server flatlines for some reason. If you want to implement a similar setup, you will have to clone this repository and go through the setup instructions on both servers. One of the servers (server 1) is the "main" server that collects and post-processes all data, reports if things go wrong and uploads the tweet IDs to the OSF repository every hour. 
 
-## Data post-processing
+### Data post-processing
 **Note:** Set the paths at the beginning of the `process_hour_tweets.sh` and `parse_json_tweets.sh` (`parse_json_tweets_nonredundant.sh` for the non-redundant setup) to the correct paths corresponding to your server.  
 
 Raw JSON data is post-processed every hour on server 1, to distribute compute load throughout the day. All processing operations are collected in the script `process_hour_tweets.sh`, which calls `parse_json_tweets.sh`, `collect_data.py` and `upload_IDs_to_OSF.py`. 
@@ -59,7 +59,7 @@ Remove the last line from the script `process_hour_tweets.sh`
 The various scripts will look for a file named `server_settings.txt` in the `/code` directory of this repository. This file collects all information relevant to run the scripts at the given server and should contain the following line-separated information. See also the [example settings](https://github.com/JanaLasser/twitter_sampled_stream_v2/blob/main/code/server_settings.txt) uploaded in this repo.
 
 * `SERVER`: should be set to "1" or "2" and tells various scripts which paths to use.
-* `PYTHON_DST`: path to your systems python executable.
+* `PYTHON_DST`: path to your system's python executable.
 * `PYTHON_LIBRARY_DST`: path to the packages installed for your local python executable.
 * `TWITTER_API_KEY_DST`: path to a directory that contains the access information for your academic twitter API access. 
 * `TWITTER_API_KEY_FILENAME`: name of the file in which the API key is stored.
@@ -77,7 +77,7 @@ The various scripts will look for a file named `server_settings.txt` in the `/co
 * `DATA_VAULT_DST`: path to the folder in which the post-processed data will be stored (only necessary on server 1).
 
 ## Data ingestion from the sampled stream as a service
-Connection to the sampled stream endpoing from the Twitter API is handled in the script `get_sampled_stream.py`.
+Connection to the sampled stream endpoint from the Twitter API is handled in the script `get_sampled_stream.py`.
 The script is intended to be run as a systemd service to ensure it starts again if it terminates for some reason or the server reboots. Make sure to set this up on **both servers** in the redundant setup. See [this guide](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267) on how to set up a systemd service.
 
 The systemd unit file (I called it `get_sampled_stream.service`) in `etc/systemd/sysem` for this service should look something like this:

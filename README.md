@@ -29,7 +29,7 @@ The various scripts will look for a file named `server_settings.txt` in the `/co
 Connection to the sampled stream endpoing from the Twitter API is handled in the script `get_sampled_stream.py`.
 The script is run as a systemd service to ensure it starts again if it terminates for some reason or the server reboots. Make sure to set this up on **both servers** in the redundant setup. See [this guide](https://medium.com/codex/setup-a-python-script-as-a-service-through-systemctl-systemd-f0cc55a42267) on how to set up a systemd service.
 
-The systemd unit file for this service should look something like this:
+The systemd unit file (I called it `get_sampled_stream.service`) in `etc/systemd/sysem` for this service should look something like this:
 
 ```
     [Unit]
@@ -96,14 +96,22 @@ The file structure in `data_vault_dst` is like below, with one folder for every 
         ...
 ```
 
-## Setup without redundant server [untested]
+## Step-by-step setup
+1. Both servers: clone the code repository
+2. Both servers: Adapt the settings in `server_settings.txt` accordingly
+3. Both servers: Make sure all file paths specified in your `server_settings.txt` file exist
+4. On server 1: Adapt the first line in `process_hour_tweets.sh` to match the location of your repository.
+5. On server 1: Adapt the first line in `parse_json_tweets.sh` to match the location of your repository (do this in `parse_json_tweets_nonredundant.sh` if you are running the non-redundant setup as described below.
+6. On server 2: Adapt the script `send_data.sh` to your setup.
+
+### Setup without redundant server [untested]
 * Replace `parse_json_tweets.py` with `parse_json_tweets_nonredundant.py` in the script `process_hour_tweets.sh`. 
 * Replace `collect_data.py` with `collect_data_nonredundant.py` in the script `process_hour_tweets.sh`. 
 * Do not set up the cronjob for the `send_data.sh` script on server 2.
 
-## Setup without email notifications
+### Setup without email notifications
 * Set `notifications=False` in the `server_settings.txt` file. 
 * Do not set up the cronjob for the `send_day_report.py` script.
 
-## Setup without OSF upload
+### Setup without OSF upload
 Remove the last line from the script `process_hour_tweets.sh`

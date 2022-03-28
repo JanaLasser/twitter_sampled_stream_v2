@@ -5,6 +5,9 @@ import sys
 import osfclient
 from osfclient.utils import norm_remote_path
 
+storage = "osfstorage" # seems to be the name of the default OSF storage provider
+project_ID = "dqx39" # get this from the URL of the project in the browser
+
 ## load the settings for the server we are running on ##
 # cwd is passed via the command line, since when running as a service we can't
 # get the current working directory via os.getcwd()
@@ -41,8 +44,6 @@ osf = osfclient.OSF(
     token=osf_credentials["token"]
 )
 # initialize the project (can also be a "component" of a larger project)
-storage = "osfstorage" # seems to be the name of the default OSF storage provider
-project_ID = "dqx39" # get this from the URL of the project in the browser
 project = osf.project(project_ID)
 store = project.storage(storage)
 

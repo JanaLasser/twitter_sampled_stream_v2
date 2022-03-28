@@ -4,6 +4,7 @@ PYTHON_LIBRARY_DST=/home/jlasser/.local/lib/python3.8/site-packages/
 TWITTER_API_KEY_DST=/home/jlasser/utilities/twitter_API_keys
 TWITTER_API_KEY_FILENAME=twitter_API_hannah.txt
 NOTIFICATIONS=True
+M3CLASSIFY=False
 EMAIL_CREDENTIALS_DST=/home/jlasser/utilities/email
 EMAIL_CREDENTIALS_FILENAME=email_credentials.txt
 TMP_STORAGE_SERVER_1=/data/twitter_sampled_stream_v2_test/tmp1

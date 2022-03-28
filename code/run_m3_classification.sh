@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $1: path to json
+# $1: path to twitter data from sampled stream
 # $2: daydirname
 # $3: hourdirname
 # $4: json filename

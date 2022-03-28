@@ -14,6 +14,7 @@ The various scripts will look for a file named `server_settings.txt` in the `/co
 * `TWITTER_API_KEY_DST`: path to a directory that contains the access information for your academic twitter API access. 
 * `TWITTER_API_KEY_FILENAME`: name of the file in which the API key is stored.
 * `NOTIFICATIONS`: should be set to "True" or "False". Turns email notifications on or off.
+* `M3ClASSIFY`: this is a flag for a feature that is in development. Feel free to ignore it.
 * `EMAIL_CREDENTIALS_DST`: path to a directory that contains the credentials for your email server (only necessary if `NOTIFICATIONS=TRUE`).
 * `EMAIL_CREDENTIALS_FILENAME`: name of the file in which the email server credentials are stored (only necessary if `NOTIFICATIONS=TRUE`).
 * `TMP_STORAGE_SERVER_1`: path to the folder in which the data from the twitter API collected on server 1 is temporarily stored. Note: `get_sampled_stream.py` will check which `SERVER` it is running on and will choose the path accordingly.
